@@ -2,6 +2,7 @@ package me.dio.credit.application.system.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import me.dio.credit.application.system.dto.request.CustomerDTO
+import me.dio.credit.application.system.model.Customer
 import me.dio.credit.application.system.repository.CustomerRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -51,6 +52,93 @@ class CustomerControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.street").value("Rua da Cami, 123"))
             .andDo(MockMvcResultHandlers.print())
     }
+    @Test
+    fun `should not save a customer with same CPF and return 409 status`() {
+
+        customerRepository.save(builderCustomerDto().toEntity())
+        val customerDto: CustomerDTO = builderCustomerDto()
+        val valueAsString: String = objectMapper.writeValueAsString(customerDto)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(valueAsString)
+        )
+            .andExpect(MockMvcResultMatchers.status().isConflict)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Conflict! Consult the documentation"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").exists())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(409))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath("$.exception")
+                    .value("class org.springframework.dao.DataIntegrityViolationException")
+            )
+            .andExpect(MockMvcResultMatchers.jsonPath("$.details[*]").isNotEmpty)
+            .andDo(MockMvcResultHandlers.print())
+    }
+
+    @Test
+    fun `should not save a customer with empty firstName and return 400 status`() {
+
+        val customerDto: CustomerDTO = builderCustomerDto(firstName = "")
+        val valueAsString: String = objectMapper.writeValueAsString(customerDto)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(URL)
+                .content(valueAsString)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Bad Request! Consult the documentation"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").exists())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(400))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath("$.exception")
+                    .value("class org.springframework.web.bind.MethodArgumentNotValidException")
+            )
+            .andExpect(MockMvcResultMatchers.jsonPath("$.details[*]").isNotEmpty)
+            .andDo(MockMvcResultHandlers.print())
+    }
+
+    @Test
+    fun `should find customer by id and return 200 status`() {
+
+        val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("$URL/${customer.id}")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Cami"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.lastName").value("Cavalcante"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.cpf").value("28475934625"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("camila@email.com"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.zipCode").value("000000"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.street").value("Rua da Cami, 123"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+            .andDo(MockMvcResultHandlers.print())
+    }
+
+    @Test
+    fun `should not find customer whith invalid id and return 400 status`() {
+
+        val invalidId: Long = 2L
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("$URL/$invalidId")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Bad Request! Consult the documentation"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").exists())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(400))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath("$.exception")
+                    .value("class me.dio.credit.application.system.exception.BusinessException")
+            )
+            .andExpect(MockMvcResultMatchers.jsonPath("$.details[*]").isNotEmpty)
+            .andDo(MockMvcResultHandlers.print())
+    }
+
     private fun builderCustomerDto(
         firstName: String = "Cami",
         lastName: String = "Cavalcante",
