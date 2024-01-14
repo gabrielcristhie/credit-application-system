@@ -2,6 +2,7 @@ package me.dio.credit.application.system.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import me.dio.credit.application.system.dto.request.CustomerDTO
+import me.dio.credit.application.system.dto.request.CustomerUpdateDTO
 import me.dio.credit.application.system.model.Customer
 import me.dio.credit.application.system.repository.CustomerRepository
 import org.junit.jupiter.api.BeforeEach
@@ -174,6 +175,53 @@ class CustomerControllerTest {
             .andDo(MockMvcResultHandlers.print())
     }
 
+    @Test
+    fun `should update a customer and return 200 status`() {
+
+        val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
+        val customerUpdateDto: CustomerUpdateDTO = builderCustomerUpdateDto()
+        val valueAsString: String = objectMapper.writeValueAsString(customerUpdateDto)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch("$URL?customerId=${customer.id}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(valueAsString)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("CamiUpdate"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.lastName").value("CavalcanteUpdate"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.cpf").value("28475934625"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("camila@email.com"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.income").value("5000.0"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.zipCode").value("45656"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.street").value("Rua Updated"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+            .andDo(MockMvcResultHandlers.print())
+    }
+
+    @Test
+    fun `should not update a customer with invalid id and return 400 status`() {
+
+        val invalidId: Long = Random().nextLong()
+        val customerUpdateDto: CustomerUpdateDTO = builderCustomerUpdateDto()
+        val valueAsString: String = objectMapper.writeValueAsString(customerUpdateDto)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch("$URL?customerId=$invalidId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(valueAsString)
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Bad Request! Consult the documentation"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").exists())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(400))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath("$.exception")
+                    .value("class me.dio.credit.application.system.exception.BusinessException")
+            )
+            .andExpect(MockMvcResultMatchers.jsonPath("$.details[*]").isNotEmpty)
+            .andDo(MockMvcResultHandlers.print())
+    }
 
     private fun builderCustomerDto(
         firstName: String = "Cami",
@@ -194,5 +242,17 @@ class CustomerControllerTest {
         zipCode = zipCode,
         street = street
     )
-
+    private fun builderCustomerUpdateDto(
+        firstName: String = "CamiUpdate",
+        lastName: String = "CavalcanteUpdate",
+        income: BigDecimal = BigDecimal.valueOf(5000.0),
+        zipCode: String = "45656",
+        street: String = "Rua Updated"
+    ): CustomerUpdateDTO = CustomerUpdateDTO(
+        firstName = firstName,
+        lastName = lastName,
+        income = income,
+        zipCode = zipCode,
+        street = street
+    )
 }
