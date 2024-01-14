@@ -1,11 +1,11 @@
-package me.dio.credit.application.system.dto
+package me.dio.credit.application.system.dto.request
 
 import jakarta.validation.constraints.NotEmpty
 import me.dio.credit.application.system.model.Customer
 import org.jetbrains.annotations.NotNull
 import java.math.BigDecimal
 
-data class CustomerUpdateDto(
+data class CustomerUpdateDTO(
     @field:NotEmpty(message = "Invalid input") val firstName: String,
     @field:NotEmpty(message = "Invalid input") val lastName: String,
     @field:NotNull() val income: BigDecimal,

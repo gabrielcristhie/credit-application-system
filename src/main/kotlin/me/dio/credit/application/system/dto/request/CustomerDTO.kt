@@ -1,4 +1,4 @@
-package me.dio.credit.application.system.dto
+package me.dio.credit.application.system.dto.request
 
 import me.dio.credit.application.system.model.Address
 import me.dio.credit.application.system.model.Customer
