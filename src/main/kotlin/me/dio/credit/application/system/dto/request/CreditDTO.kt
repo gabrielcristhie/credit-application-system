@@ -5,15 +5,15 @@ import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import me.dio.credit.application.system.model.Credit
 import me.dio.credit.application.system.model.Customer
-import org.jetbrains.annotations.NotNull
+import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 import java.time.LocalDate
 
 data class CreditDTO(
-    @field:NotNull val creditValue: BigDecimal,
+    @field:NotNull(message = "Invalid input") val creditValue: BigDecimal,
     @field:Future val dayFirstOfInstallment: LocalDate,
     @field:Min(value = 1) @field:Max(value = 48) val numberOfInstallments: Int,
-    @field:NotNull val customerId: Long
+    @field:NotNull(message = "Invalid input") val customerId: Long
 ) {
 
     fun toEntity(): Credit = Credit(

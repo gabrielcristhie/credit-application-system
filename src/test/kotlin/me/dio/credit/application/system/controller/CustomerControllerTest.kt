@@ -5,6 +5,7 @@ import me.dio.credit.application.system.dto.request.CustomerDTO
 import me.dio.credit.application.system.dto.request.CustomerUpdateDTO
 import me.dio.credit.application.system.model.Customer
 import me.dio.credit.application.system.repository.CustomerRepository
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,15 +26,21 @@ import java.util.*
 @AutoConfigureMockMvc
 @ContextConfiguration
 class CustomerControllerTest {
-    @Autowired private lateinit var customerRepository: CustomerRepository
-    @Autowired private lateinit var mockMvc: MockMvc
-    @Autowired private lateinit var objectMapper: ObjectMapper
+    @Autowired
+    private lateinit var customerRepository: CustomerRepository
+    @Autowired
+    private lateinit var mockMvc: MockMvc
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     companion object {
         const val URL: String = "/api/customers"
     }
-    @BeforeEach fun setup() = customerRepository.deleteAll()
-    @BeforeEach fun tearDown() = customerRepository.deleteAll()
+
+    @BeforeEach
+    fun setup() = customerRepository.deleteAll()
+    @AfterEach
+    fun tearDown() = customerRepository.deleteAll()
 
     @Test
     fun `should create a customer and return 201 status`() {
@@ -43,17 +50,21 @@ class CustomerControllerTest {
 
         mockMvc.perform(
             MockMvcRequestBuilders.post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(valueAsString))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(valueAsString)
+        )
             .andExpect(MockMvcResultMatchers.status().isCreated)
             .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Cami"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.lastName").value("Cavalcante"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.cpf").value("28475934625"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("camila@email.com"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.income").value("1000.0"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.zipCode").value("000000"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.street").value("Rua da Cami, 123"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
             .andDo(MockMvcResultHandlers.print())
     }
+
     @Test
     fun `should not save a customer with same CPF and return 409 status`() {
 
@@ -80,10 +91,11 @@ class CustomerControllerTest {
 
     @Test
     fun `should not save a customer with empty firstName and return 400 status`() {
-
+        //given
         val customerDto: CustomerDTO = builderCustomerDto(firstName = "")
         val valueAsString: String = objectMapper.writeValueAsString(customerDto)
-
+        //when
+        //then
         mockMvc.perform(
             MockMvcRequestBuilders.post(URL)
                 .content(valueAsString)
@@ -107,7 +119,7 @@ class CustomerControllerTest {
         val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$URL/${customer.id}")
+            MockMvcRequestBuilders.get("$URL/findById/${customer.id}")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
@@ -127,8 +139,9 @@ class CustomerControllerTest {
         val invalidId: Long = 2L
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$URL/$invalidId")
-                .accept(MediaType.APPLICATION_JSON))
+            MockMvcRequestBuilders.get("$URL/findById/$invalidId")
+                .accept(MediaType.APPLICATION_JSON)
+        )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
             .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Bad Request! Consult the documentation"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").exists())
@@ -147,7 +160,7 @@ class CustomerControllerTest {
         val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
 
         mockMvc.perform(
-            MockMvcRequestBuilders.delete("$URL/${customer.id}")
+            MockMvcRequestBuilders.delete("$URL/findById/${customer.id}")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNoContent)
@@ -160,7 +173,7 @@ class CustomerControllerTest {
         val invalidId: Long = Random().nextLong()
 
         mockMvc.perform(
-            MockMvcRequestBuilders.delete("$URL/${invalidId}")
+            MockMvcRequestBuilders.delete("$URL/findById/${invalidId}")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
@@ -242,6 +255,7 @@ class CustomerControllerTest {
         zipCode = zipCode,
         street = street
     )
+
     private fun builderCustomerUpdateDto(
         firstName: String = "CamiUpdate",
         lastName: String = "CavalcanteUpdate",
