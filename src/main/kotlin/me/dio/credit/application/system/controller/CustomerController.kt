@@ -26,6 +26,12 @@ class CustomerController (
         val customer: Customer = this.customerServiceImpl.findById(id)
         return ResponseEntity.status(HttpStatus.OK).body(CustomerView(customer))
     }
+    @GetMapping("/findAll")
+    fun getCustomers(): ResponseEntity<List<CustomerView>> {
+        val customers: List<Customer> = this.customerServiceImpl.findAll()
+        val customerViews: List<CustomerView> = customers.map { customer -> CustomerView(customer) }
+        return ResponseEntity.status(HttpStatus.OK).body(customerViews)
+    }
 
     @DeleteMapping("/delete/{id}")
     fun deleteCustomer(@PathVariable id: Long) {

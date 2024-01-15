@@ -19,4 +19,6 @@ class CustomerServiceImpl(
 
     override fun delete(id: Long) =
         this.customerRepository.deleteById(id)
+    override fun findAll(): List<Customer> =
+        this.customerRepository.findAll().toList()
 }
