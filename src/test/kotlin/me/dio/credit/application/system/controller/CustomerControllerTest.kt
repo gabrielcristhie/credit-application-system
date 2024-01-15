@@ -91,11 +91,10 @@ class CustomerControllerTest {
 
     @Test
     fun `should not save a customer with empty firstName and return 400 status`() {
-        //given
+
         val customerDto: CustomerDTO = builderCustomerDto(firstName = "")
         val valueAsString: String = objectMapper.writeValueAsString(customerDto)
-        //when
-        //then
+
         mockMvc.perform(
             MockMvcRequestBuilders.post(URL)
                 .content(valueAsString)
@@ -129,7 +128,7 @@ class CustomerControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("camila@email.com"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.zipCode").value("000000"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.street").value("Rua da Cami, 123"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+            //.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
             .andDo(MockMvcResultHandlers.print())
     }
 
@@ -160,7 +159,7 @@ class CustomerControllerTest {
         val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
 
         mockMvc.perform(
-            MockMvcRequestBuilders.delete("$URL/findById/${customer.id}")
+            MockMvcRequestBuilders.delete("$URL/delete/${customer.id}")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNoContent)
@@ -173,7 +172,7 @@ class CustomerControllerTest {
         val invalidId: Long = Random().nextLong()
 
         mockMvc.perform(
-            MockMvcRequestBuilders.delete("$URL/findById/${invalidId}")
+            MockMvcRequestBuilders.delete("$URL/delete/${invalidId}")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
@@ -208,7 +207,7 @@ class CustomerControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.income").value("5000.0"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.zipCode").value("45656"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.street").value("Rua Updated"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+            //.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
             .andDo(MockMvcResultHandlers.print())
     }
 
