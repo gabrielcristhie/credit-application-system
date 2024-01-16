@@ -1,5 +1,6 @@
 package me.dio.credit.application.system.service.impl
 
+import org.springframework.cache.annotation.Cacheable
 import me.dio.credit.application.system.exception.BusinessException
 import me.dio.credit.application.system.model.Customer
 import me.dio.credit.application.system.repository.CustomerRepository
@@ -19,7 +20,7 @@ class CustomerServiceImpl(
         this.customerRepository.findById(id).orElseThrow {
             throw BusinessException("Id $id not found")
     }
-
+    @Cacheable("customersCache")
     override fun findAll(pageable: Pageable): Page<Customer> =
         this.customerRepository.findAll(pageable)
 

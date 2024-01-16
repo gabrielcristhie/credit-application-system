@@ -32,12 +32,13 @@
 </figure>
 
 <h3>Alterações/Melhorias que fiz/estou fazendo:</h3>
+</br>
 -[ ] Alterar banco de dados para PostgreSQL   
 -[x] Criar Dockerfile
 -[ ] Criar Docker compose
 -[x] Adicionar endpoint para listar todos clientes
 -[x] Adicionar paginação de clientes
--[ ] Adicionar cache na lista de clientes
+-[x] Adicionar cache na lista de clientes
 -[ ] Adicionar método de safe delete 
 -[ ] Adicionar Load Balancer
 
