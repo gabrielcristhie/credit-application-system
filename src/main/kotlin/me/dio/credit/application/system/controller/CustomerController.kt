@@ -6,6 +6,10 @@ import me.dio.credit.application.system.dto.request.CustomerUpdateDTO
 import me.dio.credit.application.system.dto.response.CustomerView
 import me.dio.credit.application.system.model.Customer
 import me.dio.credit.application.system.service.impl.CustomerServiceImpl
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -28,10 +32,10 @@ class CustomerController (
         return ResponseEntity.status(HttpStatus.OK).body(CustomerView(customer))
     }
     @GetMapping("/findAll")
-    fun getCustomers(): ResponseEntity<List<CustomerView>> {
-        val customers: List<Customer> = this.customerServiceImpl.findAll()
-        val customerViews: List<CustomerView> = customers.map { customer -> CustomerView(customer) }
-        return ResponseEntity.status(HttpStatus.OK).body(customerViews)
+    fun getCustomers(@PageableDefault(size = 20) paginacao: Pageable): Page<CustomerView> {
+        val customers: Page<Customer> = this.customerServiceImpl.findAll(paginacao)
+        val customerViews: List<CustomerView> = customers.content.map { customer -> CustomerView(customer) }
+        return PageImpl(customerViews, paginacao, customers.totalElements)
     }
 
     @DeleteMapping("/delete/{id}")

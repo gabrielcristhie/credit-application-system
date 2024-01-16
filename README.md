@@ -36,7 +36,7 @@
 -[x] Criar Dockerfile
 -[ ] Criar Docker compose
 -[x] Adicionar endpoint para listar todos clientes
--[ ] Adicionar paginação de clientes
+-[x] Adicionar paginação de clientes
 -[ ] Adicionar cache na lista de clientes
 -[ ] Adicionar método de safe delete 
 -[ ] Adicionar Load Balancer
